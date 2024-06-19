@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import SkinImage
-from django.conf import settings
+from .models import Articles
 
 
 class BaseSerializer(serializers.Serializer):
@@ -27,6 +26,19 @@ class SkinImageSerializer(serializers.Serializer):
     description = serializers.CharField(max_length=99999999)
 
     def get_image_url(self, obj):
+        request = self.context.get('request')
+        base_url = request.build_absolute_uri('/')
+        image_path = obj.image.url.lstrip('/')
+        return base_url + image_path
+
+
+class ArticlesSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+    class Meta:
+        model = Articles
+        fields = '__all__'
+    
+    def get_image(self, obj):
         request = self.context.get('request')
         base_url = request.build_absolute_uri('/')
         image_path = obj.image.url.lstrip('/')

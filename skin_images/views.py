@@ -6,9 +6,8 @@ from rest_framework.viewsets import ViewSet
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from .services import SkinImagesAnalyzerService
-from .serializers import UserSerializer, SkinImageSerializer
-from .models import SkinImage
-from django.conf import settings
+from .serializers import UserSerializer, SkinImageSerializer, ArticlesSerializer
+from .models import SkinImage, Articles
 
 class SkinImagesAnalyzerView(ViewSet):
 
@@ -30,7 +29,11 @@ class SkinImagesAnalyzerView(ViewSet):
         image = request.data.get('image') 
         if not image:
             return Response({'error': 'No image provided.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
+        valid_image_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+        if image.content_type not in valid_image_types:
+            return Response({'error': 'Invalid file type. Only JPG, JPEG, PNG, and GIF images are allowed.'}, status=status.HTTP_400_BAD_REQUEST)
+
         description = SkinImagesAnalyzerService.analyze_image(image)
 
         skin_image = SkinImage(user=request.user)
@@ -50,4 +53,11 @@ class SkinImagesAnalyzerView(ViewSet):
         user_images = SkinImage.objects.filter(user=request.user)
 
         serializer = SkinImageSerializer(user_images, many=True, context={'request': request})
+        return Response(serializer.data)
+
+
+    @action(['get'], detail=False, permission_classes=[AllowAny])
+    def articles(self, request):
+        articles = Articles.objects.all()
+        serializer = ArticlesSerializer(articles, many=True, context={'request': request})
         return Response(serializer.data)
