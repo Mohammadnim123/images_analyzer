@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
     'skin_images',
 ]
 
@@ -127,6 +130,25 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=360),  # Set the access token lifespan to 60 minutes
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=365),  # Set the sliding token refresh lifespan to 1 day
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=360),  # Set the sliding token lifespan to 120 minutes
+    'ROTATE_REFRESH_TOKENS': False,  # Set to True to enable rotating refresh tokens
+    'ALGORITHM': 'HS256',  # Token signing algorithm
+    'SIGNING_KEY': SECRET_KEY,  # Use your Django project's secret key for token signing
+    'AUTH_HEADER_TYPES': ('Bearer',),  # The types of authorization headers for token authentication
+}
+
 INTERNAL_IPS = [
     '127.0.0.1',
 ]
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'images')

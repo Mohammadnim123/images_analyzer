@@ -1,5 +1,5 @@
 class SkinImagesAnalyzerService:
 
     @classmethod
-    def test_view(cls):
+    def analyze_image(cls, image):
         return "Batata"
