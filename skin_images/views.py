@@ -3,8 +3,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
-from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
 from .services import SkinImagesAnalyzerService
 from .serializers import UserSerializer, SkinImageSerializer, ArticlesSerializer
 from .models import SkinImage, Articles
@@ -18,10 +18,16 @@ class SkinImagesAnalyzerView(ViewSet):
         if serializer.is_valid():
             password = serializer.validated_data.pop('password')
             hashed_password = make_password(password)
-            user = User.objects.create(password=hashed_password, **serializer.validated_data)
+            user = get_user_model().objects.create(password=hashed_password, **serializer.validated_data)
             return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @action(['get'], detail=False, permission_classes=[IsAuthenticated])
+    def user_data(self, request):
+        user=request.user
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
 
 
     @action(['post'], detail=False, permission_classes=[IsAuthenticated])

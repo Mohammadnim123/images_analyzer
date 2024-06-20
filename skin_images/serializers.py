@@ -1,5 +1,5 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from .models import Articles
 
 
@@ -16,8 +16,8 @@ class BaseSerializer(serializers.Serializer):
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['username', 'email', 'password']
+        model = get_user_model()
+        fields = ['username', 'email', 'password', 'dob', 'gender']
         extra_kwargs = {'password': {'write_only': True}}
 
 

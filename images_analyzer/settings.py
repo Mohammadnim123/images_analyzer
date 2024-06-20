@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-z-ef0je#6ab$9-6jt6qif+anp3fe=gx&vta%w*%@(2t+=kna-$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 CORS_ALLOW_ALL_ORIGINS = True
 
 
@@ -152,3 +152,5 @@ INTERNAL_IPS = [
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'images')
+
+AUTH_USER_MODEL = 'skin_images.CustomUser'
