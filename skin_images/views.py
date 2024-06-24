@@ -3,10 +3,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ViewSet
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.auth import get_user_model
 from .services import SkinImagesAnalyzerService
-from .serializers import UserSerializer, SkinImageSerializer, ArticlesSerializer
+from .serializers import (UserSerializer, SkinImageSerializer, ArticlesSerializer,
+                        ChangePasswordSerializer, ChangeEmailSerializer)
 from .models import SkinImage, Articles
 
 class SkinImagesAnalyzerView(ViewSet):
@@ -67,3 +68,33 @@ class SkinImagesAnalyzerView(ViewSet):
         articles = Articles.objects.all()
         serializer = ArticlesSerializer(articles, many=True, context={'request': request})
         return Response(serializer.data)
+
+
+    @action(['post'], detail=False, permission_classes=[IsAuthenticated])
+    def change_password(self, request):
+        user = request.user
+        serializer = ChangePasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            old_password = serializer.validated_data['old_password']
+            new_password = serializer.validated_data['new_password']
+            if not check_password(old_password, user.password):
+                return Response({'error': 'Old password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+            user.password = make_password(new_password)
+            user.save()
+            return Response({'status': 'Password changed successfully.'}, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    @action(['post'], detail=False, permission_classes=[IsAuthenticated])
+    def change_email(self, request):
+        user = request.user
+        serializer = ChangeEmailSerializer(data=request.data)
+        if serializer.is_valid():
+            password = serializer.validated_data['password']
+            new_email = serializer.validated_data['new_email']
+            if not check_password(password, user.password):
+                return Response({'error': 'Password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+            user.email = new_email
+            user.save()
+            return Response({'status': 'Email changed successfully.'}, status=status.HTTP_202_ACCEPTED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

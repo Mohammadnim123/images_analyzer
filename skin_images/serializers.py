@@ -3,17 +3,6 @@ from rest_framework import serializers
 from .models import Articles
 
 
-class BaseSerializer(serializers.Serializer):
-    def is_valid(self):
-        return super().is_valid(raise_exception=True)
-    
-    def update(self, instance, validated_data):
-        pass
-
-    def create(self, validated_data):
-        pass
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
@@ -43,3 +32,13 @@ class ArticlesSerializer(serializers.ModelSerializer):
         base_url = request.build_absolute_uri('/')
         image_path = obj.image.url.lstrip('/')
         return base_url + image_path
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+
+class ChangeEmailSerializer(serializers.Serializer):
+    password = serializers.CharField(required=True)
+    new_email = serializers.EmailField(required=True)
